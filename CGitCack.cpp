@@ -5,6 +5,25 @@
 
 #define TEST test2
 
+// Hex to decimal converter
+void hex2dec()
+{
+    printf("Enter hex number : ");
+    char hexnum[32];
+    fgets(hexnum, 30, stdin);
+    int result = 0;
+    for (int i = 0; hexnum[i]; i++)
+    {
+        if (hexnum[i] >= '0' && hexnum[i] <= '9')
+            result = result * 16 + hexnum[i] - '0';
+        else if (hexnum[i] >= 'a' && hexnum[i] <= 'f')
+            result = result * 16 + hexnum[i] - 'a' + 10;
+        else if (hexnum[i] >= 'A' && hexnum[i] <= 'F')
+            result = result * 16 + hexnum[i] - 'A' + 10;
+    }
+    printf("Result is %d\n", result);
+}
+
 // Generate 20MB XML data
 void gen_20mb_xml()
 {
