@@ -2,8 +2,168 @@
 //
 
 #include "stdafx.h"
+#include <stdlib.h>
 
-#define TEST test2
+#define TEST fibonacci2
+
+// Obfuscated Fibonacci generator
+
+// 1-9: print that number of characters
+// C print ": "
+// F fgets
+// A max(n3)=atoi(buf)
+// P: print: 1=%d%d n0 n1; 2=%d n2
+// S: subtract from max
+// G: get next in sequence
+// D: decrease max(n3) and bailout if zero
+char *Ctrl = " 05foufs6ovncfs2pg5ufsntCFARP1S2GP2D";
+
+void fibonacci2()
+{
+    int n0 = printf("Welcome to Dave's Fibonacci generator\n") / (int)
+        "comment: print greeting", n1
+        = printf("-------------------------------------\n")
+        * 0 - +-1;int n2 = 3.1415926 / 2.718281 + 365.25;
+    int n3;
+    char n4[' '];
+    int n5 = 0;
+    char *ctrl = Ctrl;
+
+    while (*ctrl) {
+        switch (n5) {
+        case 0: {switch (*ctrl) {
+            case
+                'S':ctrl++;n3 -= *ctrl - '0';break;case 'D':n3--;if (n3)
+                ctrl -= 4;break;case 'G':n2 = n0;n0 = n1;n1 += n2;break;case
+                'P':n5 = 2;break;case 'R':if (n3<3)ctrl = Ctrl + 1;break;
+                case 'A':n3 = atoi(n4);break;case 'F':fgets(n4, ' ' - 2,
+                    stdin);case 'C':putchar(':');putchar(' ');break;
+                    default:if (*ctrl >= '2' && *ctrl <= '6') {
+                        n5 = 1;n3 = *ctrl
+                            - Ctrl[1];
+                    }break;
+        }}break;case 1: {putchar(*ctrl - 1);n3--;
+        if (!n3) { putchar(32);n5 = 0; }break;}case 2: {if (*ctrl ==
+            '1')printf("%d ", n0);printf("%d ", n1);n5 = 0;break;}
+        }
+        ctrl++;
+    }printf("\n");
+}
+
+void fibonacci()
+{
+    int n0 = printf("Welcome to Dave's Fibonacci generator\n") / (int)"comment: print greeting";
+    int n1 = printf("-------------------------------------\n") * 0 - -1;
+    int n2 = 3.1415926 / 2.718281 + 365.25;
+    int n3;
+    char n4[' '];
+    char n4a[' '];
+    int n5 = 0;
+    char *ctrl = Ctrl;
+    while (*ctrl)
+    {
+        switch (n5)
+        {
+        case 0:
+        {
+            switch (*ctrl)
+            {
+            case 'S':
+                ctrl++;
+                // printf("S:sub %d from n3(%d)\n",*ctrl+'0',n3);
+                n3 -= *ctrl - '0';
+                break;
+
+            case 'D':
+                n3--;
+                if (n3)
+                    ctrl -= 4;
+                // printf("D: ctrl='%s'\n",ctrl);
+                break;
+
+            case 'G':
+                // printf("G-:n0123=%d %d %d %d\n",n0,n1,n2,n3);
+                n2 = n0; // n0+n1;
+                n0 = n1;
+                n1 += n2; // n1=n2;
+                          // printf("G+:n0123=%d %d %d %d\n",n0,n1,n2,n3);
+                          // fgets(n4a,30,stdin);
+                break;
+
+            case 'P':
+                n5 = 2;
+                break;
+
+            case 'R':
+                if (n3<3)
+                    ctrl = Ctrl + 1;
+                break;
+
+            case 'A':
+                n3 = atoi(n4);
+                break;
+
+            case 'F':
+                fgets(n4, ' ' - 2, stdin);
+
+            case 'C':
+                putchar(':');
+                putchar(' ');
+                break;
+
+            default:
+                if (*ctrl >= '2' && *ctrl <= '6')
+                {
+                    n5 = 1;
+                    n3 = *ctrl - Ctrl[1];
+                }
+                break;
+            }
+        }
+        break;
+        case 1:
+        {
+            putchar(*ctrl);
+            n3--;
+            if (!n3)
+            {
+                putchar(32);
+                n5 = 0;
+            }
+            break;
+        }
+        case 2: // handle 'P'...char *Ctrl=" 05enter6number2of5termsCFARP1S2";
+        {
+            if (*ctrl == '1')
+                printf("%d ", n0);
+            printf("%d ", n1);
+            n5 = 0;
+            break;
+        }
+        }
+        ctrl++;
+        // printf("ctrl++: ctrl='%s'\n",ctrl);
+    }
+    /*
+    int n0=0, n1=1, n2;
+    int max;
+    char buf[32];
+    do {
+    printf("Enter number of terms: ");
+    fgets(buf,30,stdin);
+    max=atoi(buf);
+    } while (max<3);
+    printf("%d %d ",n0,n1);
+    max-=2;
+    while (max--)
+    {
+    n2=n0+n1;
+    n0=n1;
+    n1=n2;
+    printf("%d ",n1);
+    }*/
+    printf("\n");
+}
 
 // Hex to decimal converter
 void hex2dec()
