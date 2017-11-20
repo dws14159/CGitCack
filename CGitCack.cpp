@@ -5,10 +5,23 @@
 
 #define TEST test2
 
+// Generate 20MB XML data
+void gen_20mb_xml()
+{
+    int total, i = 0;
+    total = printf("<Twenty meg test data>\n") * 2 + 1;
+    while (total<20 * 1048576)
+    {
+        total += printf("<test data %d>blah blah blah blah</test data %d>\n", i, i);
+        i++;
+    }
+    total = printf("</Twenty meg test data>\n") * 2 + 1;
+}
+
 // converting double to hex and back https://stackoverflow.com/q/46668785/5937167
 void test2()
 {
-    printf("sizeof double=%d\n", sizeof(double)); // 8
+    printf("sizeof double=%zd\n", sizeof(double)); // 8
 
     union
     {
