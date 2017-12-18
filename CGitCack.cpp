@@ -4,7 +4,40 @@
 #include "stdafx.h"
 #include <stdlib.h>
 
-#define TEST fibonacci2
+#define TEST test3
+
+// Testing assignment to const variations (compile-only)
+void test3()
+{
+    const char *kings1[] = { "Antigonus", "Seleucus", "Ptolemy" };
+    // kings1[0][0] = 'B'; // error C3892: 'kings': you cannot assign to a variable that is const
+    kings1[1] = "Bob";
+
+    char const *kings2[] = { "Antigonus", "Seleucus", "Ptolemy" };
+    // kings2[0][0] = 'B'; // error C3892 : 'kings2' : you cannot assign to a variable that is const
+    kings2[1] = "Bob";
+
+    char * const kings3[] = { "Antigonus", "Seleucus", "Ptolemy" };
+    kings3[0][0] = 'B';
+    // kings3[1] = "Bob"; // error C3892: 'kings3': you cannot assign to a variable that is const
+
+    const int x1 = 1;
+    int const x2 = 2;
+    // x1 = 5; // C3892
+    // x2 = 5; // C3892
+
+    int y = 1, z = 2;
+    const int *py1 = &y;
+    int const *py2 = &y;
+    int * const py3 = &y;
+    py1 = &z;
+    py2 = &z;
+    // py3 = &z; // c3892
+
+    // *py1 = 5; // c3892
+    // *py2 = 5; // c3892
+    *py3 = 5;
+}
 
 // Obfuscated Fibonacci generator
 
