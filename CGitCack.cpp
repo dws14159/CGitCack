@@ -4,7 +4,31 @@
 #include "stdafx.h"
 #include <stdlib.h>
 
-#define TEST test4
+#define TEST test5
+
+/* A Pythagorean triplet is a set of three natural numbers a<b<c for which a^2+b^2=c^2.
+For example, 3^2+4^2=9+16=25=5^2.
+There exists exactly one Pythagorean triplet for which a+b+c=1000. Find the product abc. */
+// https://codereview.stackexchange.com/q/224132/155266
+void test5()
+{
+    int checks = 0;
+    for (int a=1; a<=332; a++)
+    {
+        for (int b=a+1; b<=998; b++)
+        {
+            int c = 1000 - a - b;
+
+            // By construction a+b+c=1000 so we don't need to check for this.
+
+            // So let's just check if a^2+b^2=c^2
+            checks++;
+            if (a*a + b * b == c * c)
+                printf("a=%d; b=%d; c=%d; abc=%d\n", a, b, c, a*b*c);
+        }
+    }
+    printf("Performed %d checks in total\n", checks);
+}
 
 /* At an exotic bird market sale, ostriches are $10 each, emus are $5 each 
 and puffins go for $0.50. You cannot buy any fractional birds. How many 
