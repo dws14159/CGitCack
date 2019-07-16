@@ -4,7 +4,27 @@
 #include "stdafx.h"
 #include <stdlib.h>
 
-#define TEST test3
+#define TEST test4
+
+/* At an exotic bird market sale, ostriches are $10 each, emus are $5 each 
+and puffins go for $0.50. You cannot buy any fractional birds. How many 
+ostriches, emus and puffins can be bought with $100 to make 100 birds in all? */
+void test4()
+{
+    for (int puf = 0; puf <= 100; puf++)
+    {
+        for (int emu = 0; emu <= 20; emu++)
+        {
+            for (int ost = 0; ost <= 10; ost++)
+            {
+                if (puf * 50 + emu * 500 + ost * 1000 == 10000 && puf + emu + ost == 100)
+                {
+                    printf("%d puffins, %d emus and %d ostriches\n", puf, emu, ost);
+                }
+            }
+        }
+    }
+}
 
 // Testing assignment to const variations (compile-only)
 void test3()
