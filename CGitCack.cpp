@@ -3,8 +3,123 @@
 
 #include "stdafx.h"
 #include <stdlib.h>
+#include <string.h>
 
-#define TEST test5
+#define TEST test6
+
+// Bracketed CSV to INSERT statements (not generic in any sense)
+// ER: add quote handling [O'Hara] -> 'O'Hara' -> string not properly terminated
+// ER: check 'A &. B' inserts 'A & B' and handle that, without needing to SET DEFINE OFF
+void test6()
+{
+    // char *filename = "C:\\Users\\david.spencer\\Documents\\__Tasks\\Goliat PrtScrs 10 July\\OraData\\arr_data.txt";
+    char *filename = "C:\\Users\\david.spencer\\Documents\\__Tasks\\Goliat PrtScrs 10 July\\OraData\\pob_data.txt";
+    char *opfile = "C:\\Users\\david.spencer\\Documents\\__Tasks\\Goliat PrtScrs 10 July\\OraData\\INSERTs_pob.txt";
+
+    char output[1024];
+    char line[1024];
+    FILE *fp;
+    errno_t foo1 = fopen_s(&fp, filename, "r");
+    FILE *ofp;
+    errno_t foo2 = fopen_s(&ofp, opfile, "a");
+
+    if (!foo1 && !foo2)
+    {
+        for (;;)
+        {
+            if (feof(fp))
+                break;
+
+            if (fgets(line, 1022, fp))
+            {
+                // Ignore lines that don't start with [
+                if (line[0] == '[')
+                {
+                    printf("Found line starting '['\n");
+                    //strcpy_s(output, 1024, "insert into v_arr__data(RESERVATION_ID,DW_ID,PERSON_ID,LAST_NAME,FIRST_NAME,DATE_OF_BIRTH,SALEM_TAG,S3ID_HID_PID,TRANSPORTATION_DATE,TRANSPORTATION_NO,START_LOCATION,END_LOCATION,LIFEBOAT_NO,SHIFT_CODE,EMERGENCY_TEAM_CODE_ID,EMERGENCY_ROLE_CODE,COMPANY,COMPANY_NAME,BED_INSTALLATION,BED_CABIN,BED_NO) values (");
+                    strcpy_s(output, 1024, "insert into v_pob__data(INSTALLATION,DW_ID,PERSON_ID,LAST_NAME,FIRST_NAME,DATE_OF_BIRTH,SALEM_TAG,S3ID_HID_PID,LIFEBOAT_NO,SHIFT_CODE,EMERGENCY_TEAM_CODE_ID,EMERGENCY_ROLE_CODE,COMPANY,COMPANY_NAME,BED_INSTALLATION,BED_CABIN,BED_NO) values (");
+                    char tok[128];
+                    int t = 0;
+                    int stat = 0;
+                    int col = 0;
+                    for (int i = 0; i < strlen(line); i++)
+                    {
+                        switch (stat)
+                        {
+                        case 0: // looking for [ to start the token
+                            if (line[i] == '[')
+                            {
+                                printf("Found [ starting new token\n");
+                                tok[t = 0] = 0;
+                                stat = 1;
+                            }
+                            break;
+
+                        case 1: // build up the token, ending at ]. Truncate token at 126.
+                            if (line[i] == ']')
+                                stat = 2;
+                            else if (t < 126)
+                            {
+                                printf("Adding '%c' to token\n", line[i]);
+                                tok[t++] = line[i];
+                                tok[t] = 0;
+                            }
+                            break;
+
+                        case 2: // Process the token
+                        {
+                            printf("Process token '%s' for column %d\n", tok, col);
+                            switch (col)
+                            {
+                            case 1: // NUMBER; the token just gets added in
+                                printf("case %d: NUMBER type concat <%s,>\n", col, tok);
+                                strcat_s(output, 1024, tok);
+                                strcat_s(output, 1024, ",");
+                                break;
+                            case 5: // DATEs
+                                printf("case %d: DATE - <TO_DATE('%s','DD-MON-RR'),>\n", col, tok);
+                                strcat_s(output, 1024, "TO_DATE('");
+                                strcat_s(output, 1024, tok);
+                                strcat_s(output, 1024, "','DD-MON-RR'),");
+                                break;
+                            case 16: // VARCHAR2 but also the last token
+                                printf("case %d: Last VARCHAR2 <'%s'>);\n", col, tok);
+                                strcat_s(output, 1024, "'");
+                                strcat_s(output, 1024, tok);
+                                strcat_s(output, 1024, "');");
+                                break;
+                            default: // everything else is VARCHAR2 and not last
+                                printf("default(col=%d): non-last VARCHAR2 <'%s'>\n", col, tok);
+                                strcat_s(output, 1024, "'");
+                                strcat_s(output, 1024, tok);
+                                strcat_s(output, 1024, "',");
+                                break;
+                            }
+                            col++;
+                            // As we didn't process line[i] push it back
+                            i--;
+                            stat = 3;
+                        }
+                        break;
+
+                        case 3: // Skip the comma separator
+                            if (line[i] == ',')
+                            {
+                                printf("Skip comma separator\n");
+                                stat = 0;
+                            }
+                            break;
+                        }
+                    }
+                    fputs(output, ofp);
+                    fputs("\n", ofp);
+                }
+            }
+        }
+        fclose(fp);
+        fclose(ofp);
+    }
+}
 
 /* A Pythagorean triplet is a set of three natural numbers a<b<c for which a^2+b^2=c^2.
 For example, 3^2+4^2=9+16=25=5^2.
