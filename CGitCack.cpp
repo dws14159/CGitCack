@@ -12,8 +12,10 @@
 #include <tuple>
 #include <limits>
 #include <fstream>
+#include <string.h>
 
-#define TEST test4
+#define TEST test8
+
 using std::cin;
 using std::cout;
 using std::endl;
@@ -27,7 +29,7 @@ using std::endl;
 typedef std::tuple<std::complex<double>, std::vector <std::string>> Node_t;
 typedef std::vector<Node_t> NodeList_t;
 
-void test5()
+void test8()
 {
     using namespace std::complex_literals;
 
@@ -37,7 +39,7 @@ void test5()
     cout << "Square roots of " << num << " are " << principleRoot << " and " << secRoot << endl;
 }
 
-void test4a(std::complex<double> start, std::vector<std::string> ops, NodeList_t &NL)
+void test7a(std::complex<double> start, std::vector<std::string> ops, NodeList_t &NL)
 {
     std::for_each(ops.begin(), ops.end(), [&](const std::string s) {
         // Work out newOps which is ops minus the current string s.
@@ -57,32 +59,105 @@ void test4a(std::complex<double> start, std::vector<std::string> ops, NodeList_t
         if (s == "-1") {
             std::complex<double> newStart = start - 1.0;
             NL.push_back(std::make_tuple(newStart, newOps));
-            test4a(newStart, newOps, NL);
+            test7a(newStart, newOps, NL);
         }
         else if (s == "/3") {
             std::complex<double> newStart = start / 3.0;
             NL.push_back(std::make_tuple(newStart, newOps));
-            test4a(newStart, newOps, NL);
+            test7a(newStart, newOps, NL);
         }
         else if (s == "*2") {
             std::complex<double> newStart = start * 2.0;
             NL.push_back(std::make_tuple(newStart, newOps));
-            test4a(newStart, newOps, NL);
+            test7a(newStart, newOps, NL);
         }
         else if (s == "sqrt") {
             std::complex<double> newStart = std::sqrt(start);
 
             // There are 2 square roots of a complex number: std::sqrt gives us the principle, and the secondary is just the principle * -1.0
             NL.push_back(std::make_tuple(newStart, newOps));
-            test4a(newStart, newOps, NL);
+            test7a(newStart, newOps, NL);
             NL.push_back(std::make_tuple(newStart * -1.0, newOps));
-            test4a(newStart * -1.0, newOps, NL);
+            test7a(newStart * -1.0, newOps, NL);
         }
     });
 }
-#include <string.h>
 
-#define TEST test6
+// Solver for https://puzzling.stackexchange.com/questions/97439/how-to-get-32-by-using-1-1-%c3%973-%c3%973-%c3%b72-%c3%b72-2-2/97564#97564
+// How to get 32 by using +1 , +1 , ×3 , ×3 , ÷2 , ÷2, ^2, ^2?
+// Starting from 32 we reverse the operations to -1, /3, *2 and sqrt then just traverse the resulting tree.
+void test7()
+{
+    NodeList_t NodeList;
+
+    // Set the initial value of 32 and list of operations
+    std::complex<double> init = 32.0;
+    std::vector<std::string> ops = { "-1", "-1", "/3", "/3", "*2", "*2", "sqrt", "sqrt" };
+
+    // Recursively build the node list
+    test7a(init, ops, NodeList);
+
+    std::ofstream plt("C:\\Dev\\nodes.plt");
+    plt << "set xrange [-15: 7]\n";
+    plt << "set yrange [-9: 9]\n";
+    plt << "set format x \" % 3.5f\"\n";
+    plt << "set format y \" % 3.5f\"\n";
+    plt << "set tics\n";
+    plt << "unset key\n";
+    plt << "plot '-' with points\n";
+
+    // Display the created nodes
+    int lineCount = 0;
+    int resultCount = 0;
+    double minReal = DBL_MAX, maxReal = -DBL_MAX, minImag = DBL_MAX, maxImag = -DBL_MAX;
+    std::vector<std::complex<double>> uniqueResults;
+    std::for_each(NodeList.begin(), NodeList.end(), [&](auto& node) {
+        auto ops = std::get<1>(node);
+        // Only display the nodes with no remaining operations, i.e. the leaves
+        if (!ops.size()) {
+            auto c = std::get<0>(node);
+            resultCount++;
+
+            // Add c to uniqueResults if it's not already in there
+            if (std::all_of(uniqueResults.begin(), uniqueResults.end(), [&](auto r) {
+                return std::abs(c.real() - r.real()) > 0.0001 || std::abs(c.imag() - r.imag()) > 0.0001; }))
+            {
+                uniqueResults.push_back(c);
+            }
+
+                cout << "(" << c.real();
+
+                if (std::abs(c.imag()) < 0.00001) {
+                    cout << " + i0) ";
+                }
+                else if (c.imag() <= -0.00001) {
+                    cout << " - i" << c.imag() * -1.0 << ") ";
+                }
+                else {
+                    cout << " + i" << c.imag() << ") ";
+                }
+                if (c.real() < minReal) minReal = c.real();
+                if (c.real() > maxReal) maxReal = c.real();
+                if (c.imag() < minImag) minImag = c.imag();
+                if (c.imag() > maxImag) maxImag = c.imag();
+
+                plt << c.real() << " " << c.imag() << endl;
+        }
+        //cout << "Node at point (" << .real() << " + i" << std::get<0>(node).imag() << ") has remaining ops: ";
+        //std::for_each(ops.begin(), ops.end(), [](const std::string& s) {cout << s + " "; });
+        //cout << endl;
+        //linecount++;
+        //if (linecount > 45) {
+        //    linecount = 0;
+        //    cin.ignore();
+        //}
+        });
+    plt.close();
+    cout << "\nTotal results: " << resultCount << endl;
+    cout << "Real axis from " << minReal << " to " << maxReal << endl;
+    cout << "Imaginary axis from " << minImag << " to " << maxImag << endl;
+    cout << "uniqueResults size=" << uniqueResults.size() << endl;
+}
 
 // Bracketed CSV to INSERT statements (not generic in any sense)
 // ER: add quote handling [O'Hara] -> 'O'Hara' -> string not properly terminated
@@ -241,81 +316,6 @@ void test4()
         }
     }
 }
-// Solver for https://puzzling.stackexchange.com/questions/97439/how-to-get-32-by-using-1-1-%c3%973-%c3%973-%c3%b72-%c3%b72-2-2/97564#97564
-// How to get 32 by using +1 , +1 , ×3 , ×3 , ÷2 , ÷2, ^2, ^2?
-// Starting from 32 we reverse the operations to -1, /3, *2 and sqrt then just traverse the resulting tree.
-void test4()
-{
-    NodeList_t NodeList;
-
-    // Set the initial value of 32 and list of operations
-    std::complex<double> init = 32.0;
-    std::vector<std::string> ops = { "-1", "-1", "/3", "/3", "*2", "*2", "sqrt", "sqrt" };
-
-    // Recursively build the node list
-    test4a(init, ops, NodeList);
-
-    std::ofstream plt("C:\\Dev\\nodes.plt");
-    plt << "set xrange [-15: 7]\n";
-    plt << "set yrange [-9: 9]\n";
-    plt << "set format x \" % 3.5f\"\n";
-    plt << "set format y \" % 3.5f\"\n";
-    plt << "set tics\n";
-    plt << "unset key\n";
-    plt << "plot '-' with points\n";
-
-    // Display the created nodes
-    int lineCount = 0;
-    int resultCount = 0;
-    double minReal=DBL_MAX, maxReal=-DBL_MAX, minImag=DBL_MAX, maxImag=-DBL_MAX;
-    std::vector<std::complex<double>> uniqueResults;
-    std::for_each(NodeList.begin(), NodeList.end(), [&](auto& node) {
-        auto ops = std::get<1>(node);
-        // Only display the nodes with no remaining operations, i.e. the leaves
-        if (!ops.size()) {
-            auto c = std::get<0>(node);
-            resultCount++;
-
-            // Add c to uniqueResults if it's not already in there
-            if (std::all_of(uniqueResults.begin(), uniqueResults.end(), [&](auto r) {
-                return std::abs(c.real() - r.real()) > 0.0001 || std::abs(c.imag() - r.imag()) > 0.0001; }))
-            {
-                uniqueResults.push_back(c);
-            }
-
-            cout << "(" << c.real();
-
-            if (std::abs(c.imag()) < 0.00001) {
-                cout << " + i0) ";
-            }
-            else if (c.imag() <= -0.00001) {
-                cout << " - i" << c.imag() * -1.0 << ") ";
-            }
-            else {
-                cout << " + i" << c.imag() << ") ";
-            }
-            if (c.real() < minReal) minReal = c.real();
-            if (c.real() > maxReal) maxReal = c.real();
-            if (c.imag() < minImag) minImag = c.imag();
-            if (c.imag() > maxImag) maxImag = c.imag();
-
-            plt << c.real() << " " << c.imag() << endl;
-        }
-        //cout << "Node at point (" << .real() << " + i" << std::get<0>(node).imag() << ") has remaining ops: ";
-        //std::for_each(ops.begin(), ops.end(), [](const std::string& s) {cout << s + " "; });
-        //cout << endl;
-        //linecount++;
-        //if (linecount > 45) {
-        //    linecount = 0;
-        //    cin.ignore();
-        //}
-        });
-    plt.close();
-    cout << "\nTotal results: " << resultCount << endl;
-    cout << "Real axis from " << minReal << " to " << maxReal << endl;
-    cout << "Imaginary axis from " << minImag << " to " << maxImag << endl;
-    cout << "uniqueResults size=" << uniqueResults.size() << endl;
-}
 
 // Testing assignment to const variations (compile-only)
 void test3()
@@ -352,9 +352,6 @@ void test3()
 
 // Obfuscated Fibonacci generator
 
-// 1-9: print that number of characters
-// C print ": "
-// F fgets
 // A max(n3)=atoi(buf)
 // P: print: 1=%d%d n0 n1; 2=%d n2
 // S: subtract from max
@@ -391,7 +388,6 @@ void fibonacci2()
 //            '1')printf("%d ", n0);printf("%d ", n1);n5 = 0;break;}
 //        }
 //        ctrl++;
-//    }printf("\n");
 }
 
 void fibonacci()
