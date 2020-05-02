@@ -7,18 +7,30 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <set>
 #include <complex>
 #include <tuple>
 #include <limits>
 #include <fstream>
+#include <sstream>
 #include <string.h>
 
-#define TEST test8
+#define TEST test9
 
 using std::cin;
 using std::cout;
 using std::endl;
+
+void test10()
+{
+    cout << std::setw(10) << std::fixed << 3.141 << endl;
+    cout << std::setw(10) << std::fixed << 31.41 << endl;
+    cout << std::setw(10) << std::fixed << 31.4 << endl;
+    cout << std::setw(10) << std::fixed << 314.1 << endl;
+    cout << std::setw(10) << std::fixed << -314.1 << endl;
+    cout << std::setw(10) << std::fixed << -314.159265358979 << endl;
+}
 
 // Puzzling at StackExchange
 // How to get 32 using +1 +1 *3 *3 /2 /2 ^2 ^2
@@ -28,6 +40,178 @@ using std::endl;
 
 typedef std::tuple<std::complex<double>, std::vector <std::string>> Node_t;
 typedef std::vector<Node_t> NodeList_t;
+std::string ComplexToString(std::complex<double>& c);
+
+// Types for the permutation rewrite
+typedef std::tuple<std::complex<double>, std::vector<std::string>, std::string> Report_t;
+typedef std::vector<Report_t> ReportList_t;
+
+std::string NodeReport(std::complex<double> num, std::vector <std::string> ops)
+{
+    std::stringstream ret;
+    //ret << "Got result " << std:: 
+    return "foo";
+}
+
+// Returns TRUE if the two complex numbers are nearly equal, FALSE otherwise
+bool ComplexCompare(double Re1, double Im1, double Re2, double Im2)
+{
+    return std::abs(Re1-Re2) < 0.0001 && std::abs(Im1-Im2) < 0.0001;
+}
+
+void AddIfNotPresent(ReportList_t & rptList, std::complex<double> num, std::vector <std::string> ops, std::string sqrtSigns)
+{
+    static int lineCount = 0;
+    bool gotNum = false;
+    std::for_each(rptList.begin(), rptList.end(), [&](Report_t& rpt) {
+        std::complex<double> c = std::get<0>(rpt);
+        if (ComplexCompare(c.real(), c.imag(), num.real(), num.imag())) {
+            gotNum=true;
+        }
+        });
+    if (!gotNum) {
+        rptList.push_back(std::make_tuple(num, ops, sqrtSigns));
+        char rptStr[128];
+        sprintf_s(rptStr, 128, "% -7.5f % -6.5f %s %s %s %s %s %s %s %s sqrtSigns=%s\n", num.real(), num.imag(), 
+            ops[0].c_str(), ops[1].c_str(), ops[2].c_str(), ops[3].c_str(), ops[4].c_str(), ops[5].c_str(), ops[6].c_str(), ops[7].c_str(), sqrtSigns.c_str());
+        cout << rptStr;
+        lineCount++;
+        if (lineCount > 45) {
+            lineCount = 0;
+            //cin.ignore();
+        }
+    }
+}
+
+// Redo the 32 puzzle with permutations, and working out four solutions for the ++, +-, -+ and -- sqrts
+void test9()
+{
+    ReportList_t rptList;
+    std::vector<std::string> OpsList = { "-1","-1","/3","/3","*2","*2","sqrt","sqrt" };
+    std::sort(OpsList.begin(), OpsList.end());
+    do {
+        std::complex<double> numPP = 32;
+        std::complex<double> numPM = 32;
+        std::complex<double> numMP = 32;
+        std::complex<double> numMM = 32;
+        int whichSqrt = 0;
+        std::for_each(OpsList.begin(), OpsList.end(), [&](const std::string s) {
+            if (s == "-1") {
+                numPP -= 1.0;
+                numPM -= 1.0;
+                numMP -= 1.0;
+                numMM -= 1.0;
+            }
+            else if (s == "*2") {
+                numPP *= 2.0;
+                numPM *= 2.0;
+                numMP *= 2.0;
+                numMM *= 2.0;
+            }
+            else if (s == "/3") {
+                numPP /= 3.0;
+                numPM /= 3.0;
+                numMP /= 3.0;
+                numMM /= 3.0;
+            }
+            else if (s == "sqrt") {
+                if (whichSqrt == 0) {
+                    numPP = std::sqrt(numPP);
+                    numPM = std::sqrt(numPM);
+                    numMP = std::sqrt(numMP) * -1.0;
+                    numMM = std::sqrt(numMM) * -1.0;
+                    whichSqrt++;
+                }
+                else if (whichSqrt == 1) {
+                    numPP = std::sqrt(numPP);
+                    numPM = std::sqrt(numPM) * -1.0;
+                    numMP = std::sqrt(numMP);
+                    numMM = std::sqrt(numMM) * -1.0;
+                }
+            }
+            });
+        AddIfNotPresent(rptList, numPP, OpsList, "++");
+        AddIfNotPresent(rptList, numPM, OpsList, "+-");
+        AddIfNotPresent(rptList, numMP, OpsList, "-+");
+        AddIfNotPresent(rptList, numMM, OpsList, "--");
+    } while (std::next_permutation(OpsList.begin(), OpsList.end()));
+    cout << "Writing file...";
+    std::ofstream plt("C:\\Dev\\nodes.plt");
+    plt << "set xrange [-15: 7]\n";
+    plt << "set yrange [-9: 9]\n";
+    plt << "set format x \" % 3.5f\"\n";
+    plt << "set format y \" % 3.5f\"\n";
+    plt << "set tics\n";
+    plt << "unset key\n";
+    plt << "plot '-' with points\n";
+
+    double minReal = DBL_MAX, maxReal = -DBL_MAX, minImag = DBL_MAX, maxImag = -DBL_MAX;
+
+    std::for_each(rptList.begin(), rptList.end(), [&](Report_t &rpt) {
+        auto c = std::get<0>(rpt);
+        plt << c.real() << " " << c.imag() << endl;
+        if (c.real() < minReal) minReal = c.real();
+        if (c.real() > maxReal) maxReal = c.real();
+        if (c.imag() < minImag) minImag = c.imag();
+        if (c.imag() > maxImag) maxImag = c.imag();
+        });
+    plt.close();
+    cout << endl;
+    cout << "Real axis from " << minReal << " to " << maxReal << endl;
+    cout << "Imaginary axis from " << minImag << " to " << maxImag << endl;
+}
+
+void test8b()
+{
+    std::complex<double> foo = 32;
+    cout << "Starting point : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+}
+
+void test8a()
+{
+    std::complex<double> foo = 32;
+    cout << "Starting point : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "Divide by 3 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+}
 
 void test8()
 {
@@ -44,7 +228,14 @@ void test7a(std::complex<double> start, std::vector<std::string> ops, NodeList_t
     std::for_each(ops.begin(), ops.end(), [&](const std::string s) {
         // Work out newOps which is ops minus the current string s.
         // Doesn't look like there's a remove by value newOps=ops; newOps.whatever(s);
-        //cout << "Processing operation [" << s << "]\n";
+        //cout << "Processing operation [" << s << "] on starting value " << ComplexToString(start) << "\n";
+
+        // Break at -4 -5.44929. But the operations found in the stack trace don't produce this result!
+        if (std::abs(start.real() + 4.0) < 0.0001 && std::abs(start.imag() + 5.44929) < 0.0001)
+        {
+            int ix = 0;
+            ix++;
+        }
         std::vector<std::string> newOps;
         bool removed = false;
         std::for_each(ops.begin(), ops.end(), [&](const std::string t) {
@@ -81,6 +272,22 @@ void test7a(std::complex<double> start, std::vector<std::string> ops, NodeList_t
             test7a(newStart * -1.0, newOps, NL);
         }
     });
+}
+
+std::string ComplexToString(std::complex<double> &c)
+{
+    std::string ret = "(" + std::to_string(c.real());
+
+    if (std::abs(c.imag()) < 0.00001) {
+        ret += " + i0) ";
+    }
+    else if (c.imag() <= -0.00001) {
+        ret += " - i" + std::to_string(c.imag() * -1.0) + ") ";
+    }
+    else {
+        ret += " + i" + std::to_string(c.imag()) + ") ";
+    }
+    return ret;
 }
 
 // Solver for https://puzzling.stackexchange.com/questions/97439/how-to-get-32-by-using-1-1-%c3%973-%c3%973-%c3%b72-%c3%b72-2-2/97564#97564
@@ -125,32 +332,28 @@ void test7()
                 uniqueResults.push_back(c);
             }
 
-                cout << "(" << c.real();
-
-                if (std::abs(c.imag()) < 0.00001) {
-                    cout << " + i0) ";
-                }
-                else if (c.imag() <= -0.00001) {
-                    cout << " - i" << c.imag() * -1.0 << ") ";
-                }
-                else {
-                    cout << " + i" << c.imag() << ") ";
-                }
+                cout << ComplexToString(c);
                 if (c.real() < minReal) minReal = c.real();
                 if (c.real() > maxReal) maxReal = c.real();
                 if (c.imag() < minImag) minImag = c.imag();
                 if (c.imag() > maxImag) maxImag = c.imag();
 
                 plt << c.real() << " " << c.imag() << endl;
+
+                cout << "Node at point (" << ComplexToString(c) << ") has remaining ops: ";
+                std::for_each(ops.begin(), ops.end(), [](const std::string& s) {cout << s + " "; });
+                cout << endl;
+                lineCount++;
+                if (lineCount > 45) {
+                    lineCount = 0;
+                    cin.ignore();
+                }
         }
-        //cout << "Node at point (" << .real() << " + i" << std::get<0>(node).imag() << ") has remaining ops: ";
-        //std::for_each(ops.begin(), ops.end(), [](const std::string& s) {cout << s + " "; });
-        //cout << endl;
-        //linecount++;
-        //if (linecount > 45) {
-        //    linecount = 0;
-        //    cin.ignore();
-        //}
+        else
+        {
+            int ix = 0;
+            ix++;
+        }
         });
     plt.close();
     cout << "\nTotal results: " << resultCount << endl;
