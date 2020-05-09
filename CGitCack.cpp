@@ -11,16 +11,169 @@
 #include <set>
 #include <complex>
 #include <tuple>
+#include <regex>
 #include <limits>
 #include <fstream>
 #include <sstream>
 #include <string.h>
 
-#define TEST test9
+#define TEST test12
 
 using std::cin;
 using std::cout;
 using std::endl;
+
+bool ccinc(char* c)
+{
+    bool carry = false;
+    if (*c == 'z') {
+        *c = 'a';
+        carry = true;
+    }
+    else if (*c == '-') {
+        *c = 'a';
+    }
+    else if (*c >= 'a' && *c <= 'y') {
+        (*c)++;
+    }
+    return carry;
+}
+
+// tests ccinc; after processing all of -adyz# testChars should contain abeza# and only the z should return a carry
+void test13()
+{
+    char testChars[] = "-adyz#";
+    bool carry;
+    for (int i = 0; testChars[i]; i++) {
+        carry = ccinc(&testChars[i]);
+        printf("i=%d; testChars='%s'; carry='%s'\n", i, testChars, carry ? "true" : "false");
+    }
+}
+
+// Check that incrementing various string counters works as expected
+void test14()
+{
+    char testCounter[32];
+    bool quit = false;
+    for (int i = 0; !quit; i++) {
+        switch (i) {
+        case 0: strcpy_s(testCounter, 32, "--aa"); break;
+        case 1: strcpy_s(testCounter, 32, "--az"); break;
+        case 2: strcpy_s(testCounter, 32, "--zz"); break;
+        case 3: strcpy_s(testCounter, 32, "-zzz"); break;
+        case 4: strcpy_s(testCounter, 32, "zzzz"); break;
+        default: quit = true; break;
+        }
+        if (!quit) {
+            printf("Testing '%s'\n", testCounter);
+            bool carry = true;
+            for (int j = strlen(testCounter) - 1; carry && j >= 0; j--) {
+                carry = ccinc(&testCounter[j]);
+            }
+            printf("Results: carry='%s', counter='%s'\n", carry ? "true" : "false", testCounter);
+        }
+    }
+}
+
+std::string test12a(char* op, int sum, int xor, int xor1)
+{
+    std::string ret;
+    char c[5] = "--aa";
+    char buf[64];
+    bool more = true;
+    int hb = 0;
+    while (more) {
+        int mysum = 0, myxor = 0, myxor1 = 0;
+        for (int i = 0; c[i]; i++) {
+            if (c[i] >= 'a' && c[i] <= 'z') {
+                mysum += c[i];
+                myxor ^= c[i];
+                myxor1 = (myxor1 << 1) ^ c[i];
+            }
+        }
+        if (strcmp(c, op)) {
+            //if (mysum == sum) {
+            //    sprintf_s(buf, 64, "sum(%s) ", c);
+            //    ret += buf;
+            //}
+            //if (myxor == xor) {
+            //    sprintf_s(buf, 64, "xor(%s) ", c);
+            //    ret += buf;
+            //}
+            if (mysum == sum && myxor == xor &&myxor1 == xor1) {
+                sprintf_s(buf, 64, "all(%s) ", c);
+                ret += buf;
+            }
+        }
+        bool carry = true;
+        for (int j = strlen(c) - 1; carry && j >= 0; j--) {
+            carry = ccinc(&c[j]);
+        }
+        if (carry) {
+            more = false;
+        }
+        //hb++;
+        //if (hb > 1000) {
+        //    hb = 0;
+        //    printf("[HB %s]", c);
+        //}
+    }
+    return ret;
+}
+
+void test12()
+{
+//    char* ops[] = { "adc", "add", "and", "bit", "call", "ccf", "cp", "cpd", "cpdr", "cpi", "cpir", "cpl", "daa", "dec", "di",
+//        "djnz", "ei", "ex", "exx", "halt", "im", "in", "inc", "ind", "indr", "ini", "inir", "jp", "jr", "ld", "ldd",
+//        "lddr", "ldi", "ldir", "neg", "nop", "op", "out", "outd", "otdr", "outi", "otir", "pop", "push", "res", "ret",
+//        "reti", "retn", "rla", "rl", "rlca", "rlc", "rld", "rra", "rr", "rrca", "rrc", "rst", "sbc", "scf", "set", "sla",
+//        "sra", "sll", "srl", "sub", "xor", "" };
+    char* ops[] = { "-adc", "-add", "-and", "-bit", "call", "-ccf", "--cp", "-cpd", "cpdr", "-cpi", "cpir", "-cpl", "-daa", "-dec", "--di",
+        "djnz", "--ei", "--ex", "-exx", "halt", "--im", "--in", "-inc", "-ind", "indr", "-ini", "inir", "--jp", "--jr", "--ld", "-ldd",
+        "lddr", "-ldi", "ldir", "-neg", "-nop", "--op", "-out", "outd", "otdr", "outi", "otir", "-pop", "push", "-res", "-ret",
+        "reti", "retn", "-rla", "--rl", "rlca", "-rlc", "-rld", "-rra", "--rr", "rrca", "-rrc", "-rst", "-sbc", "-scf", "-set", "-sla",
+        "-sra", "-sll", "-srl", "-sub", "-xor", "" };
+
+    for (int i = 0; ops[i][0]; i++) {
+        int sum = 0, xor = 0, xor1 = 0;
+        for (int j = 0; ops[i][j]; j++) {
+            if (ops[i][j] != '-') {
+                sum += ops[i][j];
+                xor ^= ops[i][j];
+                xor1 = (xor1 << 1) ^ ops[i][j];
+            }
+        }
+        printf("%4s sum=[%3d] xor=[%3d] ", ops[i], sum, xor);
+        std::string falsePos = test12a(ops[i], sum, xor, xor1);
+        if (falsePos.empty()) {
+            printf("\n");
+        }
+        else {
+            printf("false+ves[%s]\n", falsePos.c_str());
+        }
+    }
+}
+
+// Test some regex stuff for Compiler
+void test11()
+{
+    std::string str = "foo: bar: quux: gronk: ld a,(hl)";
+    std::regex r("^ *([a-z][a-z0-9_]*):");
+    std::smatch sm;
+    while (std::regex_search(str, sm, r)) {
+        cout << "Found label [" << sm[1].str() << "]\n";
+        str = sm.suffix();
+    }
+    //std::string str = "\tld    a,(ix +2)\t\t  ; Remove this comment please";
+
+    //std::transform(str.begin(), str.end(), str.begin(),
+    //    [](unsigned char c) -> unsigned char { return std::tolower(c); });
+
+    // str = std::regex_replace(str, std::regex(";.*$"),"");
+    //cout << "[" << str << "]  ";
+    //std::for_each(str.begin(), str.end(), [](const char c) { cout << std::hex << (int)c << "=" << c << " ";  });
+    //cout << endl;
+}
 
 void test10()
 {
