@@ -941,6 +941,9 @@ void test3()
 
 // Obfuscated Fibonacci generator
 
+// 1-9: print that number of characters
+// C print ": "
+// F fgets
 // A max(n3)=atoi(buf)
 // P: print: 1=%d%d n0 n1; 2=%d n2
 // S: subtract from max
@@ -977,6 +980,7 @@ void fibonacci2()
 //            '1')printf("%d ", n0);printf("%d ", n1);n5 = 0;break;}
 //        }
 //        ctrl++;
+//    }printf("\n");
 }
 
 void fibonacci()
