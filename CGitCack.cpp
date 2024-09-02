@@ -17,11 +17,244 @@
 #include <sstream>
 #include <string.h>
 
-#define TEST test12
+#define TEST test24
 
 using std::cin;
 using std::cout;
 using std::endl;
+using std::string;
+
+// (a+b)+c != a+(b+c) ?
+// https://www.reddit.com/r/learnprogramming/comments/10srhk5/comment/j75s6js/?context=3
+void test24()
+{
+    int a = INT_MAX, b = 5, c = INT_MIN;
+
+    int ab_c = (a + b) + c;
+    int a_bc = a + (b + c);
+    printf("(a+b)+c = %d\n", ab_c);
+    printf("a+(b+c) = %d\n", a_bc);
+}
+
+
+// https://www.reddit.com/r/cpp_questions/comments/q96igb/for_c_does_anyone_know_how_to_list_5_strings/
+// List five strings alphabetically only using loops
+void test23()
+{
+    string a = "foo"; // 4
+    string b = "bar"; // 0
+    string c = "bif"; // 2
+    string d = "baz"; // 1
+    string e = "bof"; // 3
+
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            if (j != i)
+            {
+                for (int k = 0; k < 5; k++)
+                {
+                    if (k != j && k != i)
+                    {
+                        for (int m = 0; m < 5; m++)
+                        {
+                            if (m != k && m != j && m != i)
+                            {
+                                int n = 10 - (i + j + k + m);
+                                cout << i << j << k << m << n << endl;
+                                if (i == 4 && j == 0 && k == 2 && m == 1 && n == 3)
+                                    cout << "**40213\n";
+                                if (i < j && a < b &&
+                                    i < k && a < c &&
+                                    i < m && a < d &&
+                                    i < n && a < e &&
+                                    j < i && b < a &&
+                                    j < k && b < c &&
+                                    j < m && b < d &&
+                                    j < n && b < e &&
+                                    k < i && c < a &&
+                                    k < j && c < b &&
+                                    k < m && c < d &&
+                                    k < n && c < e &&
+                                    m < i && d < a &&
+                                    m < j && d < b &&
+                                    m < k && d < c &&
+                                    m < n && d < e &&
+                                    n < i && e < a &&
+                                    n < j && e < b &&
+                                    n < k && e < c &&
+                                    n < m && e < d &&
+                                    true)
+                                {
+                                    cout << a << b << c << d << e << endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void test22()
+{
+    char* filename = "F:\\BackupDataStore\\BackupData.json";
+    FILE* fp;
+    if (fopen_s(&fp, filename, "r"))
+    {
+        int space = 0, nonspace = 0;
+        while (!feof(fp))
+        {
+            if (isspace(fgetc(fp)))
+            {
+                space++;
+            }
+            else
+            {
+                nonspace++;
+            }
+        }
+        fclose(fp);
+        printf("Space to nonspace ratio = %d : %d\n", space, nonspace);
+    }
+}
+
+void test21a()
+{
+    int a, b, c;
+    a ^= 1;b ^= 1;c ^= 1;
+    a ^= 1;b ^= 1;c ^= 1;
+    printf("a=%d; b=%d; c=%d\n", a, b, c);
+    a = 20;
+    b = 37;
+    c = -99;
+}
+
+void test21()
+{
+    test21a();
+    test21a();
+}
+
+// How many possible scales exist? Up to minor thirds allowed.
+void test20()
+{
+    int count = 0;
+    for (int i = 1; i < 4096; i++)
+    {
+        char scale[32];
+        int idx = 0;
+        for (int bit = 1; bit < 4096; bit *= 2)
+        {
+            scale[idx++] = (i & bit) ? '1' : '0';
+        }
+        scale[idx] = 0;
+        if (!strstr(scale, "00000") && scale[11]=='1')
+        {
+            printf("%d: %s\n", count++, scale);
+        }
+    }
+}
+
+void test19()
+{
+    //if (9 + 10 == true)
+    //{
+    //    printf("Hello\n");
+    //}
+
+    printf("%d\n", strcmp("M", "A"));
+    printf("%d\n", strcmp("A", "M"));
+    printf("%d\n", strcmp("M", "M"));
+}
+
+void test18()
+{
+    //double d = 10.0;
+    //double* dp = &d;
+    //short s[] = { 0,0,0,16420 };
+    //int x1 = *(double*)&s[0];
+    //int x2 = *(double*)s;
+    //int x3 = *(double*)(new short[]{ 0,0,0,16420 });
+    //
+    //auto sa = new short[4];
+    //sa[3] = 16420;
+    //int x4 = *(double*)sa;
+
+    short s0 = 16420;
+    //int x5= (int)*(double*)((&) & 255;
+    auto x6 = (int)*(double*)(&s0 - 3);
+    int x7 = (int)(double)(short)16420;
+    auto x8 = (int)*(double*)"лллллл$@";
+}
+
+void test17()
+{
+    int bound = 80;
+    if (bound >= 0 || bound < 10000)
+    {
+        int primeCount = 0;
+        bool *arr;
+        arr = new bool[bound];
+        for (int i = 0; i < bound; arr[i++] = false);
+        memset(arr, true, sizeof(arr));
+        printf("sizeof(arr)=%zd\n", sizeof(arr));
+
+        for (int p = 2; p * p < bound; p++)
+        {
+            if (arr[p]==true)
+            {
+                for (int i = 2 * p; i < bound; i += p)
+                {
+                    arr[i] = false;
+                }
+            }
+        }
+
+        for (int p = 2; p < bound; p++)
+        {
+            if (arr[p])
+            {
+                primeCount = primeCount + 1;
+            }
+        }
+        printf("primeCount=%d\n", primeCount);
+    }
+}
+
+void test16()
+{
+    bool arr[5];
+    for (int i = 0; i < 5; i++)
+        arr[i] = i;
+    for (int i = 0; i < 5; i++)
+    {
+        if (arr[i])
+            printf("arr[%d] is true\n", i);
+
+        if (arr[i] == true)
+            printf("arr[%d]==true\n", i);
+        else
+            printf("arr[%d]!=true\n", i);
+    }
+}
+
+void test15()
+{
+    for (double i = 0.1; i <= 1.0; i += 0.1)
+    {
+        if (i==0.7)
+            printf("Found it! (1)");
+    }
+
+    for (double i = 0.3; i <= 3.0; i += 0.3)
+    {
+        if (i/3.0 == 0.7)
+            printf("Found it! (2)");
+    }
+}
 
 bool ccinc(char* c)
 {
@@ -37,17 +270,6 @@ bool ccinc(char* c)
         (*c)++;
     }
     return carry;
-}
-
-// tests ccinc; after processing all of -adyz# testChars should contain abeza# and only the z should return a carry
-void test13()
-{
-    char testChars[] = "-adyz#";
-    bool carry;
-    for (int i = 0; testChars[i]; i++) {
-        carry = ccinc(&testChars[i]);
-        printf("i=%d; testChars='%s'; carry='%s'\n", i, testChars, carry ? "true" : "false");
-    }
 }
 
 // Check that incrementing various string counters works as expected
@@ -67,11 +289,22 @@ void test14()
         if (!quit) {
             printf("Testing '%s'\n", testCounter);
             bool carry = true;
-            for (int j = strlen(testCounter) - 1; carry && j >= 0; j--) {
+            for (int j = static_cast<int>(strlen(testCounter)) - 1; carry && j >= 0; j--) {
                 carry = ccinc(&testCounter[j]);
             }
             printf("Results: carry='%s', counter='%s'\n", carry ? "true" : "false", testCounter);
         }
+    }
+}
+
+// tests ccinc; after processing all of -adyz# testChars should contain abeza# and only the z should return a carry
+void test13()
+{
+    char testChars[] = "-adyz#";
+    bool carry;
+    for (int i = 0; testChars[i]; i++) {
+        carry = ccinc(&testChars[i]);
+        printf("i=%d; testChars='%s'; carry='%s'\n", i, testChars, carry ? "true" : "false");
     }
 }
 
@@ -106,7 +339,7 @@ std::string test12a(char* op, int sum, int xor, int xor1)
             }
         }
         bool carry = true;
-        for (int j = strlen(c) - 1; carry && j >= 0; j--) {
+        for (int j = static_cast<int>(strlen(c)) - 1; carry && j >= 0; j--) {
             carry = ccinc(&c[j]);
         }
         if (carry) {
