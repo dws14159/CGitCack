@@ -17,12 +17,25 @@
 #include <sstream>
 #include <string.h>
 
-#define TEST test26e
+#define TEST test27
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+
+void test27()
+{
+    for (int i = 1; i <= 16; i++)
+    {
+        if (!(i % 3)) printf("Fizz");
+        if (!(i % 5)) printf("Buzz");
+        // not (!(i % 3)) and not (!(i % 5)) --> (i % 3) and (i % 5) (simplify the nots)
+        // no need to change the && to ||
+        if (i % 3 && i % 5) printf("%d", i);
+        printf("\n");
+    }
+}
 
 // Draw a house, final one line version
 void test26e()
