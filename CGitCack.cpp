@@ -17,12 +17,22 @@
 #include <sstream>
 #include <string.h>
 
-#define TEST test24
+#define TEST test25
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+
+void test25()
+{
+    // adding an int and a float shows an FPU bug that makes 2+2=5
+    char* sum = "2 + 2.0";
+    int total = 0;
+    for (int i = 0; sum[i]; i++)
+        total = (total + sum[i]) & strlen(sum); // AND op prevents buffer overflow
+    printf("%s = %d\n", sum, total);
+}
 
 // (a+b)+c != a+(b+c) ?
 // https://www.reddit.com/r/learnprogramming/comments/10srhk5/comment/j75s6js/?context=3
