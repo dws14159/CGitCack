@@ -17,12 +17,186 @@
 #include <sstream>
 #include <string.h>
 
-#define TEST test25
+#define TEST test26e
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+
+// Draw a house, final one line version
+void test26e()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++)
+        for (q = 0; q < w + 2; q++)x = q % 8, y = i % 8, u = (i - (h + 1)) % 6, 
+            putchar(q == w + 1 ? 10 : i <= h ? !i && q == h ? 42 : i == h - q ? 47 : i == q - h ? 92 : 32 : !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && 
+            x > 2 && x < 6 ? 45 : !u && x>0 ? 45 : !x || u == 3 && (x == 3 || x == 5) ? 124 : 32);
+}
+
+// Draw a house, slightly differently than "c"
+void test26d()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++)
+        for (q = 0; q < w + 2; q++)
+            x = q % 8,
+            y = i % 8,
+            u = (i - h - 1) % 6,
+            putchar(q == w + 1 ? 10 :
+                i <= h ? !i && q == h ? 42 :
+                i == h - q ? 47 :
+                i == q - h ? 92 :
+                32 :
+                !u && x || !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && x > 2 && x < 6 ? 45 : // x>2 && x<6
+                //!u&&x ? 45 :
+                !x || u == 3 && (x == 3 || x == 5) ? 124
+                : 32);
+}
+
+// Draw a house: slightly obfuscated version
+ void test26c()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++) // r*8 was *6
+        for (q = 0; q < w + 2; q++)
+            x = q % 8,
+            y = i % 8,
+            u = (i - (h + 1)) % 6,   // 6 was 8
+            putchar(q == w + 1 ? 10 :
+                i <= h ? !i && q == h ? 42 : // '*'=42
+                i == h - q ? 47 : // '/'=47
+                i == q - h ? 92 : // '\'=92
+                32 :
+                // !u && (i<h+2 || i==h+r*6+1) ? 45 : 
+                !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && x > 2 && x < 6 ? 45 :  // u == 2 || u == 4 was 3/5; 45='-'; remove !u||
+                !u && x>0 ? 45 :
+                !x || u == 3 && (x == 3 || x == 5) ? 124 : // u == 3 was 4; 124='|'
+                32);
+}
+
+// Draw a house: state machine implementation. Bug: only draws one row of rooms
+void test26b()
+{
+    int i, x = 3, y = 4;
+    int r1 = (8 * x + 1) / 2, r2 = 1;
+    int state = 1;
+    const int CLEN = 256;
+    char cmd[CLEN], * c;
+    while (state)
+    {
+        switch (state)
+        {
+        case 1: // spaces, star, newline
+            strcpy_s(cmd, CLEN, "- 1*1\n");
+            cmd[0] = (8 * x + 1) / 2 + '0';
+            state++;
+            break;
+
+        case 2: // spaces / spaces \ newline
+            strcpy_s(cmd, CLEN, "- 1/- 1\\1\n");
+            cmd[0] = --r1 + '0';
+            cmd[4] = r2 + '0';
+            r2 += 2;
+            if (!r1) state++;
+            break;
+
+        case 3: // Top row of rooms
+            strcpy_s(cmd, CLEN, "--1\n");
+            cmd[0] = 8 * x + 1 + '0';
+            state++;
+            break;
+
+        case 4: // 2nd/6th row of rooms or quit
+        case 8:
+            if (!y--)
+                state = 99;
+            else
+            {
+                for (i = 0; i < x; i++)
+                    strcat_s(cmd, CLEN, "1|7 ");
+                strcat_s(cmd, CLEN, "1|1\n");
+                state++;
+            }
+            break;
+
+        case 5: // 3rd/5th row of rooms
+        case 7:
+            for (i = 0; i < x; i++)
+                strcat_s(cmd, CLEN, "1|2 3-2 "); // "|  ---  "
+            strcat_s(cmd, CLEN, "1|1\n");
+            state++;
+            break;
+
+        case 6: // 4th row
+            for (i = 0; i < x; i++)
+                strcat_s(cmd, CLEN, "1|2 1|1 1|2 "); // "|  | |  "
+            strcat_s(cmd, CLEN, "1|1\n");
+            state++;
+            break;
+
+        default:
+            strcpy_s(cmd, 32, "");
+            state = 0;
+            break;
+        }
+        c = cmd;
+        while (*c)
+        {
+            int num = c[0] - '0';
+            for (i = 0; i < num; i++)
+                putchar(c[1]);
+            c += 2;
+        }
+        cmd[0] = 0;
+    }
+}
+
+// Draw a house: clean version
+void test26a()
+{
+    int i, x = 3, y = 4;
+    // roof
+    int r1 = (8 * x + 1) / 2, r2 = 1;
+    for (i = 0; i < r1; i++) putchar(' ');
+    putchar('*');
+    putchar('\n');
+    while (r1--)
+    {
+        for (i = 0; i < r1; i++)
+            putchar(' ');
+        putchar('/');
+        for (i = 0; i < r2; i++)
+            putchar(' ');
+        putchar('\\');
+        putchar('\n');
+        r2 += 2;
+    }
+    // rooms
+    while (y--)
+    {
+        for (int row = 0; row < 6; row++)
+        {
+            for (int col = 0; col < x; col++)
+            {
+                switch (row)
+                {
+                case 0: printf("--------"); break;
+                case 1: printf("|       "); break;
+                case 2: printf("|  ---  "); break;
+                case 3: printf("|  | |  "); break;
+                case 4: printf("|  ---  "); break;
+                case 5: printf("|       "); break;
+                }
+            }
+            if (row)
+                printf("|\n");
+            else
+                printf("-\n");
+        }
+    }
+    // ground level
+    for (i = 0; i < 8 * x + 1; i++)
+        putchar('-');
+    putchar('\n');
+}
 
 void test25()
 {
