@@ -3,8 +3,27 @@
 
 #include "stdafx.h"
 #include <stdlib.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+#include <set>
+#include <complex>
+#include <tuple>
+#include <regex>
+#include <limits>
+#include <fstream>
+#include <sstream>
 #include <string.h>
 #include <iso646.h>
+
+#define TEST test27
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
 
 class Node {
 public:
@@ -101,9 +120,7 @@ LinkedList::~LinkedList() {
     }
 }
 
-#define TEST test8
-
-void test8()
+void test29()
 {
     // int A[] = { 1, 2, 2, 4, 5, 5, 18 };
     // int B[] = { 4, 5, 6, 7, 8, 9, 10 };
@@ -119,7 +136,7 @@ void test8()
 }
 // Black box has 3 inputs A,B,C and 3 outputs !A,!B,!C
 // Can this be implemented with 2 NOT gates, no other inverters, and as many AND and OR gates as you like?
-void test7()
+void test28()
 {
     for (int i=0; i<8; i++)
     {
@@ -145,6 +162,928 @@ void test7()
         // Display
         printf("Inputs A=%d,B=%d,C=%d --> outputs !A=%d,!B=%d,!C=%d\n", A, B, C, not_A, not_B, not_C);
     }
+}
+
+void test27()
+{
+    for (int i = 1; i <= 16; i++)
+    {
+        if (!(i % 3)) printf("Fizz");
+        if (!(i % 5)) printf("Buzz");
+        // not (!(i % 3)) and not (!(i % 5)) --> (i % 3) and (i % 5) (simplify the nots)
+        // no need to change the && to ||
+        if (i % 3 && i % 5) printf("%d", i);
+        printf("\n");
+    }
+}
+
+// Draw a house, final one line version
+void test26e()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++)
+        for (q = 0; q < w + 2; q++)x = q % 8, y = i % 8, u = (i - (h + 1)) % 6, 
+            putchar(q == w + 1 ? 10 : i <= h ? !i && q == h ? 42 : i == h - q ? 47 : i == q - h ? 92 : 32 : !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && 
+            x > 2 && x < 6 ? 45 : !u && x>0 ? 45 : !x || u == 3 && (x == 3 || x == 5) ? 124 : 32);
+}
+
+// Draw a house, slightly differently than "c"
+void test26d()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++)
+        for (q = 0; q < w + 2; q++)
+            x = q % 8,
+            y = i % 8,
+            u = (i - h - 1) % 6,
+            putchar(q == w + 1 ? 10 :
+                i <= h ? !i && q == h ? 42 :
+                i == h - q ? 47 :
+                i == q - h ? 92 :
+                32 :
+                !u && x || !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && x > 2 && x < 6 ? 45 : // x>2 && x<6
+                //!u&&x ? 45 :
+                !x || u == 3 && (x == 3 || x == 5) ? 124
+                : 32);
+}
+
+// Draw a house: slightly obfuscated version
+ void test26c()
+{
+    for (int r = 4, c = 3, x, y, q, u, h = c * 4, w = h * 2, i = 0; i < h + r * 6 + 2; i++) // r*8 was *6
+        for (q = 0; q < w + 2; q++)
+            x = q % 8,
+            y = i % 8,
+            u = (i - (h + 1)) % 6,   // 6 was 8
+            putchar(q == w + 1 ? 10 :
+                i <= h ? !i && q == h ? 42 : // '*'=42
+                i == h - q ? 47 : // '/'=47
+                i == q - h ? 92 : // '\'=92
+                32 :
+                // !u && (i<h+2 || i==h+r*6+1) ? 45 : 
+                !u && (i < h + 2 || i == h + r * 6 + 1) || (u == 2 || u == 4) && x > 2 && x < 6 ? 45 :  // u == 2 || u == 4 was 3/5; 45='-'; remove !u||
+                !u && x>0 ? 45 :
+                !x || u == 3 && (x == 3 || x == 5) ? 124 : // u == 3 was 4; 124='|'
+                32);
+}
+
+// Draw a house: state machine implementation. Bug: only draws one row of rooms
+void test26b()
+{
+    int i, x = 3, y = 4;
+    int r1 = (8 * x + 1) / 2, r2 = 1;
+    int state = 1;
+    const int CLEN = 256;
+    char cmd[CLEN], * c;
+    while (state)
+    {
+        switch (state)
+        {
+        case 1: // spaces, star, newline
+            strcpy_s(cmd, CLEN, "- 1*1\n");
+            cmd[0] = (8 * x + 1) / 2 + '0';
+            state++;
+            break;
+
+        case 2: // spaces / spaces \ newline
+            strcpy_s(cmd, CLEN, "- 1/- 1\\1\n");
+            cmd[0] = --r1 + '0';
+            cmd[4] = r2 + '0';
+            r2 += 2;
+            if (!r1) state++;
+            break;
+
+        case 3: // Top row of rooms
+            strcpy_s(cmd, CLEN, "--1\n");
+            cmd[0] = 8 * x + 1 + '0';
+            state++;
+            break;
+
+        case 4: // 2nd/6th row of rooms or quit
+        case 8:
+            if (!y--)
+                state = 99;
+            else
+            {
+                for (i = 0; i < x; i++)
+                    strcat_s(cmd, CLEN, "1|7 ");
+                strcat_s(cmd, CLEN, "1|1\n");
+                state++;
+            }
+            break;
+
+        case 5: // 3rd/5th row of rooms
+        case 7:
+            for (i = 0; i < x; i++)
+                strcat_s(cmd, CLEN, "1|2 3-2 "); // "|  ---  "
+            strcat_s(cmd, CLEN, "1|1\n");
+            state++;
+            break;
+
+        case 6: // 4th row
+            for (i = 0; i < x; i++)
+                strcat_s(cmd, CLEN, "1|2 1|1 1|2 "); // "|  | |  "
+            strcat_s(cmd, CLEN, "1|1\n");
+            state++;
+            break;
+
+        default:
+            strcpy_s(cmd, 32, "");
+            state = 0;
+            break;
+        }
+        c = cmd;
+        while (*c)
+        {
+            int num = c[0] - '0';
+            for (i = 0; i < num; i++)
+                putchar(c[1]);
+            c += 2;
+        }
+        cmd[0] = 0;
+    }
+}
+
+// Draw a house: clean version
+void test26a()
+{
+    int i, x = 3, y = 4;
+    // roof
+    int r1 = (8 * x + 1) / 2, r2 = 1;
+    for (i = 0; i < r1; i++) putchar(' ');
+    putchar('*');
+    putchar('\n');
+    while (r1--)
+    {
+        for (i = 0; i < r1; i++)
+            putchar(' ');
+        putchar('/');
+        for (i = 0; i < r2; i++)
+            putchar(' ');
+        putchar('\\');
+        putchar('\n');
+        r2 += 2;
+    }
+    // rooms
+    while (y--)
+    {
+        for (int row = 0; row < 6; row++)
+        {
+            for (int col = 0; col < x; col++)
+            {
+                switch (row)
+                {
+                case 0: printf("--------"); break;
+                case 1: printf("|       "); break;
+                case 2: printf("|  ---  "); break;
+                case 3: printf("|  | |  "); break;
+                case 4: printf("|  ---  "); break;
+                case 5: printf("|       "); break;
+                }
+            }
+            if (row)
+                printf("|\n");
+            else
+                printf("-\n");
+        }
+    }
+    // ground level
+    for (i = 0; i < 8 * x + 1; i++)
+        putchar('-');
+    putchar('\n');
+}
+
+void test25()
+{
+    // adding an int and a float shows an FPU bug that makes 2+2=5
+    char* sum = "2 + 2.0";
+    int total = 0;
+    for (int i = 0; sum[i]; i++)
+        total = (total + sum[i]) & strlen(sum); // AND op prevents buffer overflow
+    printf("%s = %d\n", sum, total);
+}
+
+// (a+b)+c != a+(b+c) ?
+// https://www.reddit.com/r/learnprogramming/comments/10srhk5/comment/j75s6js/?context=3
+void test24()
+{
+    int a = INT_MAX, b = 5, c = INT_MIN;
+
+    int ab_c = (a + b) + c;
+    int a_bc = a + (b + c);
+    printf("(a+b)+c = %d\n", ab_c);
+    printf("a+(b+c) = %d\n", a_bc);
+}
+
+
+// https://www.reddit.com/r/cpp_questions/comments/q96igb/for_c_does_anyone_know_how_to_list_5_strings/
+// List five strings alphabetically only using loops
+void test23()
+{
+    string a = "foo"; // 4
+    string b = "bar"; // 0
+    string c = "bif"; // 2
+    string d = "baz"; // 1
+    string e = "bof"; // 3
+
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            if (j != i)
+            {
+                for (int k = 0; k < 5; k++)
+                {
+                    if (k != j && k != i)
+                    {
+                        for (int m = 0; m < 5; m++)
+                        {
+                            if (m != k && m != j && m != i)
+                            {
+                                int n = 10 - (i + j + k + m);
+                                cout << i << j << k << m << n << endl;
+                                if (i == 4 && j == 0 && k == 2 && m == 1 && n == 3)
+                                    cout << "**40213\n";
+                                if (i < j && a < b &&
+                                    i < k && a < c &&
+                                    i < m && a < d &&
+                                    i < n && a < e &&
+                                    j < i && b < a &&
+                                    j < k && b < c &&
+                                    j < m && b < d &&
+                                    j < n && b < e &&
+                                    k < i && c < a &&
+                                    k < j && c < b &&
+                                    k < m && c < d &&
+                                    k < n && c < e &&
+                                    m < i && d < a &&
+                                    m < j && d < b &&
+                                    m < k && d < c &&
+                                    m < n && d < e &&
+                                    n < i && e < a &&
+                                    n < j && e < b &&
+                                    n < k && e < c &&
+                                    n < m && e < d &&
+                                    true)
+                                {
+                                    cout << a << b << c << d << e << endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void test22()
+{
+    char* filename = "F:\\BackupDataStore\\BackupData.json";
+    FILE* fp;
+    if (fopen_s(&fp, filename, "r"))
+    {
+        int space = 0, nonspace = 0;
+        while (!feof(fp))
+        {
+            if (isspace(fgetc(fp)))
+            {
+                space++;
+            }
+            else
+            {
+                nonspace++;
+            }
+        }
+        fclose(fp);
+        printf("Space to nonspace ratio = %d : %d\n", space, nonspace);
+    }
+}
+
+void test21a()
+{
+    int a, b, c;
+    a ^= 1;b ^= 1;c ^= 1;
+    a ^= 1;b ^= 1;c ^= 1;
+    printf("a=%d; b=%d; c=%d\n", a, b, c);
+    a = 20;
+    b = 37;
+    c = -99;
+}
+
+void test21()
+{
+    test21a();
+    test21a();
+}
+
+// How many possible scales exist? Up to minor thirds allowed.
+void test20()
+{
+    int count = 0;
+    for (int i = 1; i < 4096; i++)
+    {
+        char scale[32];
+        int idx = 0;
+        for (int bit = 1; bit < 4096; bit *= 2)
+        {
+            scale[idx++] = (i & bit) ? '1' : '0';
+        }
+        scale[idx] = 0;
+        if (!strstr(scale, "00000") && scale[11]=='1')
+        {
+            printf("%d: %s\n", count++, scale);
+        }
+    }
+}
+
+void test19()
+{
+    //if (9 + 10 == true)
+    //{
+    //    printf("Hello\n");
+    //}
+
+    printf("%d\n", strcmp("M", "A"));
+    printf("%d\n", strcmp("A", "M"));
+    printf("%d\n", strcmp("M", "M"));
+}
+
+void test18()
+{
+    //double d = 10.0;
+    //double* dp = &d;
+    //short s[] = { 0,0,0,16420 };
+    //int x1 = *(double*)&s[0];
+    //int x2 = *(double*)s;
+    //int x3 = *(double*)(new short[]{ 0,0,0,16420 });
+    //
+    //auto sa = new short[4];
+    //sa[3] = 16420;
+    //int x4 = *(double*)sa;
+
+    short s0 = 16420;
+    //int x5= (int)*(double*)((&) & 255;
+    auto x6 = (int)*(double*)(&s0 - 3);
+    int x7 = (int)(double)(short)16420;
+    auto x8 = (int)*(double*)"������$@";
+}
+
+void test17()
+{
+    int bound = 80;
+    if (bound >= 0 || bound < 10000)
+    {
+        int primeCount = 0;
+        bool *arr;
+        arr = new bool[bound];
+        for (int i = 0; i < bound; arr[i++] = false);
+        memset(arr, true, sizeof(arr));
+        printf("sizeof(arr)=%zd\n", sizeof(arr));
+
+        for (int p = 2; p * p < bound; p++)
+        {
+            if (arr[p]==true)
+            {
+                for (int i = 2 * p; i < bound; i += p)
+                {
+                    arr[i] = false;
+                }
+            }
+        }
+
+        for (int p = 2; p < bound; p++)
+        {
+            if (arr[p])
+            {
+                primeCount = primeCount + 1;
+            }
+        }
+        printf("primeCount=%d\n", primeCount);
+    }
+}
+
+void test16()
+{
+    bool arr[5];
+    for (int i = 0; i < 5; i++)
+        arr[i] = i;
+    for (int i = 0; i < 5; i++)
+    {
+        if (arr[i])
+            printf("arr[%d] is true\n", i);
+
+        if (arr[i] == true)
+            printf("arr[%d]==true\n", i);
+        else
+            printf("arr[%d]!=true\n", i);
+    }
+}
+
+void test15()
+{
+    for (double i = 0.1; i <= 1.0; i += 0.1)
+    {
+        if (i==0.7)
+            printf("Found it! (1)");
+    }
+
+    for (double i = 0.3; i <= 3.0; i += 0.3)
+    {
+        if (i/3.0 == 0.7)
+            printf("Found it! (2)");
+    }
+}
+
+bool ccinc(char* c)
+{
+    bool carry = false;
+    if (*c == 'z') {
+        *c = 'a';
+        carry = true;
+    }
+    else if (*c == '-') {
+        *c = 'a';
+    }
+    else if (*c >= 'a' && *c <= 'y') {
+        (*c)++;
+    }
+    return carry;
+}
+
+// Check that incrementing various string counters works as expected
+void test14()
+{
+    char testCounter[32];
+    bool quit = false;
+    for (int i = 0; !quit; i++) {
+        switch (i) {
+        case 0: strcpy_s(testCounter, 32, "--aa"); break;
+        case 1: strcpy_s(testCounter, 32, "--az"); break;
+        case 2: strcpy_s(testCounter, 32, "--zz"); break;
+        case 3: strcpy_s(testCounter, 32, "-zzz"); break;
+        case 4: strcpy_s(testCounter, 32, "zzzz"); break;
+        default: quit = true; break;
+        }
+        if (!quit) {
+            printf("Testing '%s'\n", testCounter);
+            bool carry = true;
+            for (int j = static_cast<int>(strlen(testCounter)) - 1; carry && j >= 0; j--) {
+                carry = ccinc(&testCounter[j]);
+            }
+            printf("Results: carry='%s', counter='%s'\n", carry ? "true" : "false", testCounter);
+        }
+    }
+}
+
+// tests ccinc; after processing all of -adyz# testChars should contain abeza# and only the z should return a carry
+void test13()
+{
+    char testChars[] = "-adyz#";
+    bool carry;
+    for (int i = 0; testChars[i]; i++) {
+        carry = ccinc(&testChars[i]);
+        printf("i=%d; testChars='%s'; carry='%s'\n", i, testChars, carry ? "true" : "false");
+    }
+}
+
+// Apparently xor is a keyword now
+std::string test12a(char* op, int sum, int xorQ, int xor1)
+{
+    std::string ret;
+    char c[5] = "--aa";
+    char buf[64];
+    bool more = true;
+    int hb = 0;
+    while (more) {
+        int mysum = 0, myxor = 0, myxor1 = 0;
+        for (int i = 0; c[i]; i++) {
+            if (c[i] >= 'a' && c[i] <= 'z') {
+                mysum += c[i];
+                myxor ^= c[i];
+                myxor1 = (myxor1 << 1) ^ c[i];
+            }
+        }
+        if (strcmp(c, op)) {
+            //if (mysum == sum) {
+            //    sprintf_s(buf, 64, "sum(%s) ", c);
+            //    ret += buf;
+            //}
+            //if (myxor == xor) {
+            //    sprintf_s(buf, 64, "xor(%s) ", c);
+            //    ret += buf;
+            //}
+            if (mysum == sum && myxor == xorQ &&myxor1 == xor1) {
+                sprintf_s(buf, 64, "all(%s) ", c);
+                ret += buf;
+            }
+        }
+        bool carry = true;
+        for (int j = static_cast<int>(strlen(c)) - 1; carry && j >= 0; j--) {
+            carry = ccinc(&c[j]);
+        }
+        if (carry) {
+            more = false;
+        }
+        //hb++;
+        //if (hb > 1000) {
+        //    hb = 0;
+        //    printf("[HB %s]", c);
+        //}
+    }
+    return ret;
+}
+
+void test12()
+{
+//    char* ops[] = { "adc", "add", "and", "bit", "call", "ccf", "cp", "cpd", "cpdr", "cpi", "cpir", "cpl", "daa", "dec", "di",
+//        "djnz", "ei", "ex", "exx", "halt", "im", "in", "inc", "ind", "indr", "ini", "inir", "jp", "jr", "ld", "ldd",
+//        "lddr", "ldi", "ldir", "neg", "nop", "op", "out", "outd", "otdr", "outi", "otir", "pop", "push", "res", "ret",
+//        "reti", "retn", "rla", "rl", "rlca", "rlc", "rld", "rra", "rr", "rrca", "rrc", "rst", "sbc", "scf", "set", "sla",
+//        "sra", "sll", "srl", "sub", "xor", "" };
+    char* ops[] = { "-adc", "-add", "-and", "-bit", "call", "-ccf", "--cp", "-cpd", "cpdr", "-cpi", "cpir", "-cpl", "-daa", "-dec", "--di",
+        "djnz", "--ei", "--ex", "-exx", "halt", "--im", "--in", "-inc", "-ind", "indr", "-ini", "inir", "--jp", "--jr", "--ld", "-ldd",
+        "lddr", "-ldi", "ldir", "-neg", "-nop", "--op", "-out", "outd", "otdr", "outi", "otir", "-pop", "push", "-res", "-ret",
+        "reti", "retn", "-rla", "--rl", "rlca", "-rlc", "-rld", "-rra", "--rr", "rrca", "-rrc", "-rst", "-sbc", "-scf", "-set", "-sla",
+        "-sra", "-sll", "-srl", "-sub", "-xor", "" };
+
+    for (int i = 0; ops[i][0]; i++) {
+        int sum = 0, xorQ = 0, xor1 = 0;
+        for (int j = 0; ops[i][j]; j++) {
+            if (ops[i][j] != '-') {
+                sum += ops[i][j];
+                xorQ ^= ops[i][j];
+                xor1 = (xor1 << 1) ^ ops[i][j];
+            }
+        }
+        printf("%4s sum=[%3d] xor=[%3d] ", ops[i], sum, xorQ);
+        std::string falsePos = test12a(ops[i], sum, xorQ, xor1);
+        if (falsePos.empty()) {
+            printf("\n");
+        }
+        else {
+            printf("false+ves[%s]\n", falsePos.c_str());
+        }
+    }
+}
+
+// Test some regex stuff for Compiler
+void test11()
+{
+    std::string str = "foo: bar: quux: gronk: ld a,(hl)";
+    std::regex r("^ *([a-z][a-z0-9_]*):");
+    std::smatch sm;
+    while (std::regex_search(str, sm, r)) {
+        cout << "Found label [" << sm[1].str() << "]\n";
+        str = sm.suffix();
+    }
+    //std::string str = "\tld    a,(ix +2)\t\t  ; Remove this comment please";
+
+    //std::transform(str.begin(), str.end(), str.begin(),
+    //    [](unsigned char c) -> unsigned char { return std::tolower(c); });
+
+    // str = std::regex_replace(str, std::regex(";.*$"),"");
+    //cout << "[" << str << "]  ";
+    //std::for_each(str.begin(), str.end(), [](const char c) { cout << std::hex << (int)c << "=" << c << " ";  });
+    //cout << endl;
+}
+
+void test10()
+{
+    cout << std::setw(10) << std::fixed << 3.141 << endl;
+    cout << std::setw(10) << std::fixed << 31.41 << endl;
+    cout << std::setw(10) << std::fixed << 31.4 << endl;
+    cout << std::setw(10) << std::fixed << 314.1 << endl;
+    cout << std::setw(10) << std::fixed << -314.1 << endl;
+    cout << std::setw(10) << std::fixed << -314.159265358979 << endl;
+}
+
+// Puzzling at StackExchange
+// How to get 32 using +1 +1 *3 *3 /2 /2 ^2 ^2
+// All ops are reversible on the complex plane. So let's start from 32 and work backwards to all possible starting points, then plot the points.
+// We'll probably need a recursive function, taking in a complex point and a list of operations
+// This will loop over the ops (no need for permutations) and call itself with the resulting point (or points for sqrt)
+
+typedef std::tuple<std::complex<double>, std::vector <std::string>> Node_t;
+typedef std::vector<Node_t> NodeList_t;
+std::string ComplexToString(std::complex<double>& c);
+
+// Types for the permutation rewrite
+typedef std::tuple<std::complex<double>, std::vector<std::string>, std::string> Report_t;
+typedef std::vector<Report_t> ReportList_t;
+
+std::string NodeReport(std::complex<double> num, std::vector <std::string> ops)
+{
+    std::stringstream ret;
+    //ret << "Got result " << std:: 
+    return "foo";
+}
+
+// Returns TRUE if the two complex numbers are nearly equal, FALSE otherwise
+bool ComplexCompare(double Re1, double Im1, double Re2, double Im2)
+{
+    return std::abs(Re1-Re2) < 0.0001 && std::abs(Im1-Im2) < 0.0001;
+}
+
+void AddIfNotPresent(ReportList_t & rptList, std::complex<double> num, std::vector <std::string> ops, std::string sqrtSigns)
+{
+    static int lineCount = 0;
+    bool gotNum = false;
+    std::for_each(rptList.begin(), rptList.end(), [&](Report_t& rpt) {
+        std::complex<double> c = std::get<0>(rpt);
+        if (ComplexCompare(c.real(), c.imag(), num.real(), num.imag())) {
+            gotNum=true;
+        }
+        });
+    if (!gotNum) {
+        rptList.push_back(std::make_tuple(num, ops, sqrtSigns));
+        char rptStr[128];
+        sprintf_s(rptStr, 128, "% -7.5f % -6.5f %s %s %s %s %s %s %s %s sqrtSigns=%s\n", num.real(), num.imag(), 
+            ops[0].c_str(), ops[1].c_str(), ops[2].c_str(), ops[3].c_str(), ops[4].c_str(), ops[5].c_str(), ops[6].c_str(), ops[7].c_str(), sqrtSigns.c_str());
+        cout << rptStr;
+        lineCount++;
+        if (lineCount > 45) {
+            lineCount = 0;
+            //cin.ignore();
+        }
+    }
+}
+
+// Redo the 32 puzzle with permutations, and working out four solutions for the ++, +-, -+ and -- sqrts
+void test9()
+{
+    ReportList_t rptList;
+    std::vector<std::string> OpsList = { "-1","-1","/3","/3","*2","*2","sqrt","sqrt" };
+    std::sort(OpsList.begin(), OpsList.end());
+    do {
+        std::complex<double> numPP = 32;
+        std::complex<double> numPM = 32;
+        std::complex<double> numMP = 32;
+        std::complex<double> numMM = 32;
+        int whichSqrt = 0;
+        std::for_each(OpsList.begin(), OpsList.end(), [&](const std::string s) {
+            if (s == "-1") {
+                numPP -= 1.0;
+                numPM -= 1.0;
+                numMP -= 1.0;
+                numMM -= 1.0;
+            }
+            else if (s == "*2") {
+                numPP *= 2.0;
+                numPM *= 2.0;
+                numMP *= 2.0;
+                numMM *= 2.0;
+            }
+            else if (s == "/3") {
+                numPP /= 3.0;
+                numPM /= 3.0;
+                numMP /= 3.0;
+                numMM /= 3.0;
+            }
+            else if (s == "sqrt") {
+                if (whichSqrt == 0) {
+                    numPP = std::sqrt(numPP);
+                    numPM = std::sqrt(numPM);
+                    numMP = std::sqrt(numMP) * -1.0;
+                    numMM = std::sqrt(numMM) * -1.0;
+                    whichSqrt++;
+                }
+                else if (whichSqrt == 1) {
+                    numPP = std::sqrt(numPP);
+                    numPM = std::sqrt(numPM) * -1.0;
+                    numMP = std::sqrt(numMP);
+                    numMM = std::sqrt(numMM) * -1.0;
+                }
+            }
+            });
+        AddIfNotPresent(rptList, numPP, OpsList, "++");
+        AddIfNotPresent(rptList, numPM, OpsList, "+-");
+        AddIfNotPresent(rptList, numMP, OpsList, "-+");
+        AddIfNotPresent(rptList, numMM, OpsList, "--");
+    } while (std::next_permutation(OpsList.begin(), OpsList.end()));
+    cout << "Writing file...";
+    std::ofstream plt("C:\\Dev\\nodes.plt");
+    plt << "set xrange [-15: 7]\n";
+    plt << "set yrange [-9: 9]\n";
+    plt << "set format x \" % 3.5f\"\n";
+    plt << "set format y \" % 3.5f\"\n";
+    plt << "set tics\n";
+    plt << "unset key\n";
+    plt << "plot '-' with points\n";
+
+    double minReal = DBL_MAX, maxReal = -DBL_MAX, minImag = DBL_MAX, maxImag = -DBL_MAX;
+
+    std::for_each(rptList.begin(), rptList.end(), [&](Report_t &rpt) {
+        auto c = std::get<0>(rpt);
+        plt << c.real() << " " << c.imag() << endl;
+        if (c.real() < minReal) minReal = c.real();
+        if (c.real() > maxReal) maxReal = c.real();
+        if (c.imag() < minImag) minImag = c.imag();
+        if (c.imag() > maxImag) maxImag = c.imag();
+        });
+    plt.close();
+    cout << endl;
+    cout << "Real axis from " << minReal << " to " << maxReal << endl;
+    cout << "Imaginary axis from " << minImag << " to " << maxImag << endl;
+}
+
+void test8b()
+{
+    std::complex<double> foo = 32;
+    cout << "Starting point : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+}
+
+void test8a()
+{
+    std::complex<double> foo = 32;
+    cout << "Starting point : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "Divide by 3 : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo = std::sqrt(foo) * -1.0;
+    cout << "-sqrt : " << ComplexToString(foo) << endl;
+    foo -= 1.0;
+    cout << "Deduct 1 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo *= 2.0;
+    cout << "*2 : " << ComplexToString(foo) << endl;
+    foo /= 3.0;
+    cout << "/3 : " << ComplexToString(foo) << endl;
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+    //cout << " : " << ComplexToString(foo);
+}
+
+void test8()
+{
+    using namespace std::complex_literals;
+
+    std::complex<double> num = 9. + 4i;
+    std::complex<double> principleRoot = std::sqrt(num);
+    std::complex<double> secRoot = principleRoot * -1.0;
+    cout << "Square roots of " << num << " are " << principleRoot << " and " << secRoot << endl;
+}
+
+void test7a(std::complex<double> start, std::vector<std::string> ops, NodeList_t &NL)
+{
+    std::for_each(ops.begin(), ops.end(), [&](const std::string s) {
+        // Work out newOps which is ops minus the current string s.
+        // Doesn't look like there's a remove by value newOps=ops; newOps.whatever(s);
+        //cout << "Processing operation [" << s << "] on starting value " << ComplexToString(start) << "\n";
+
+        // Break at -4 -5.44929. But the operations found in the stack trace don't produce this result!
+        if (std::abs(start.real() + 4.0) < 0.0001 && std::abs(start.imag() + 5.44929) < 0.0001)
+        {
+            int ix = 0;
+            ix++;
+        }
+        std::vector<std::string> newOps;
+        bool removed = false;
+        std::for_each(ops.begin(), ops.end(), [&](const std::string t) {
+            if (t == s && !removed) {
+                removed = true;
+            }
+            else {
+                newOps.push_back(t);
+            }
+        });
+
+        if (s == "-1") {
+            std::complex<double> newStart = start - 1.0;
+            NL.push_back(std::make_tuple(newStart, newOps));
+            test7a(newStart, newOps, NL);
+        }
+        else if (s == "/3") {
+            std::complex<double> newStart = start / 3.0;
+            NL.push_back(std::make_tuple(newStart, newOps));
+            test7a(newStart, newOps, NL);
+        }
+        else if (s == "*2") {
+            std::complex<double> newStart = start * 2.0;
+            NL.push_back(std::make_tuple(newStart, newOps));
+            test7a(newStart, newOps, NL);
+        }
+        else if (s == "sqrt") {
+            std::complex<double> newStart = std::sqrt(start);
+
+            // There are 2 square roots of a complex number: std::sqrt gives us the principle, and the secondary is just the principle * -1.0
+            NL.push_back(std::make_tuple(newStart, newOps));
+            test7a(newStart, newOps, NL);
+            NL.push_back(std::make_tuple(newStart * -1.0, newOps));
+            test7a(newStart * -1.0, newOps, NL);
+        }
+    });
+}
+
+std::string ComplexToString(std::complex<double> &c)
+{
+    std::string ret = "(" + std::to_string(c.real());
+
+    if (std::abs(c.imag()) < 0.00001) {
+        ret += " + i0) ";
+    }
+    else if (c.imag() <= -0.00001) {
+        ret += " - i" + std::to_string(c.imag() * -1.0) + ") ";
+    }
+    else {
+        ret += " + i" + std::to_string(c.imag()) + ") ";
+    }
+    return ret;
+}
+
+// Solver for https://puzzling.stackexchange.com/questions/97439/how-to-get-32-by-using-1-1-%c3%973-%c3%973-%c3%b72-%c3%b72-2-2/97564#97564
+// How to get 32 by using +1 , +1 , �3 , �3 , �2 , �2, ^2, ^2?
+// Starting from 32 we reverse the operations to -1, /3, *2 and sqrt then just traverse the resulting tree.
+void test7()
+{
+    NodeList_t NodeList;
+
+    // Set the initial value of 32 and list of operations
+    std::complex<double> init = 32.0;
+    std::vector<std::string> ops = { "-1", "-1", "/3", "/3", "*2", "*2", "sqrt", "sqrt" };
+
+    // Recursively build the node list
+    test7a(init, ops, NodeList);
+
+    std::ofstream plt("C:\\Dev\\nodes.plt");
+    plt << "set xrange [-15: 7]\n";
+    plt << "set yrange [-9: 9]\n";
+    plt << "set format x \" % 3.5f\"\n";
+    plt << "set format y \" % 3.5f\"\n";
+    plt << "set tics\n";
+    plt << "unset key\n";
+    plt << "plot '-' with points\n";
+
+    // Display the created nodes
+    int lineCount = 0;
+    int resultCount = 0;
+    double minReal = DBL_MAX, maxReal = -DBL_MAX, minImag = DBL_MAX, maxImag = -DBL_MAX;
+    std::vector<std::complex<double>> uniqueResults;
+    std::for_each(NodeList.begin(), NodeList.end(), [&](auto& node) {
+        auto ops = std::get<1>(node);
+        // Only display the nodes with no remaining operations, i.e. the leaves
+        if (!ops.size()) {
+            auto c = std::get<0>(node);
+            resultCount++;
+
+            // Add c to uniqueResults if it's not already in there
+            if (std::all_of(uniqueResults.begin(), uniqueResults.end(), [&](auto r) {
+                return std::abs(c.real() - r.real()) > 0.0001 || std::abs(c.imag() - r.imag()) > 0.0001; }))
+            {
+                uniqueResults.push_back(c);
+            }
+
+            cout << ComplexToString(c);
+            if (c.real() < minReal) minReal = c.real();
+            if (c.real() > maxReal) maxReal = c.real();
+            if (c.imag() < minImag) minImag = c.imag();
+            if (c.imag() > maxImag) maxImag = c.imag();
+
+            plt << c.real() << " " << c.imag() << endl;
+
+            cout << "Node at point (" << ComplexToString(c) << ") has remaining ops: ";
+            std::for_each(ops.begin(), ops.end(), [](const std::string& s) {cout << s + " "; });
+            cout << endl;
+            lineCount++;
+            if (lineCount > 45) {
+                lineCount = 0;
+                cin.ignore();
+            }
+        }
+        else
+        {
+            int ix = 0;
+            ix++;
+        }
+    });
+    plt.close();
+    cout << "\nTotal results: " << resultCount << endl;
+    cout << "Real axis from " << minReal << " to " << maxReal << endl;
+    cout << "Imaginary axis from " << minImag << " to " << maxImag << endl;
+    cout << "uniqueResults size=" << uniqueResults.size() << endl;
 }
 
 // Bracketed CSV to INSERT statements (not generic in any sense)
