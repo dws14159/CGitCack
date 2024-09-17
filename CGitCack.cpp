@@ -4,8 +4,148 @@
 #include "stdafx.h"
 #include <stdlib.h>
 #include <string.h>
+#include <iso646.h>
 
-#define TEST test6
+class Node {
+public:
+    int data;
+    Node* next;
+};
+
+class LinkedList {
+private:
+    Node* first;
+public:
+    LinkedList() { first = NULL; }
+    LinkedList(int A[], int size);
+    ~LinkedList();
+
+    void Display();
+    Node* GetFirstNode();
+    void MergeLists(Node* b);
+};
+
+void LinkedList::Display()
+{
+    Node *p = first;
+    while (p)
+    {
+        if (p->next)
+            printf("%d->", p->data);
+        else
+            printf("%d\n", p->data);
+        p = p->next;
+    }
+}
+
+Node* LinkedList::GetFirstNode() {
+    return first;
+}
+
+void LinkedList::MergeLists(Node* second) {
+    Node* third, *last;
+    if (!second) return;
+
+    if (first->data > second->data) {
+        last = third = second;
+        second = second->next;
+    }
+    else {
+        last = third = first;
+        first = first->next;
+    }
+    last->next = nullptr;
+
+    while (first && second) {
+        if (first->data > second->data) {
+            last->next = second;
+            last = second;
+            second = second->next;
+        }
+        else {
+            last->next = first;
+            last = first;
+            first = first->next;
+        }
+        last->next = nullptr;
+    }
+    if (!first) last->next = second;
+    else if (!second) last->next = first;
+    first = third;
+}
+
+LinkedList::LinkedList(int A[], int size) {
+    Node* last, *p;
+    first = new Node;
+
+    first->data = A[0];
+    first->next = nullptr;
+    last = first;
+
+    for (int i = 1; i < size; i++) {
+        p = new Node;
+        p->data = A[i];
+        p->next = nullptr;
+        last->next = p;
+        last = last->next;
+    }
+}
+
+LinkedList::~LinkedList() {
+    Node* p = first;
+
+    while (first) {
+        first = first->next;
+        delete p;
+        p = first;
+    }
+}
+
+#define TEST test8
+
+void test8()
+{
+    // int A[] = { 1, 2, 2, 4, 5, 5, 18 };
+    // int B[] = { 4, 5, 6, 7, 8, 9, 10 };
+    int A[] = { 1, 2, 4 };
+    int B[] = { 1, 3, 4 };
+
+    LinkedList l1(A, 3);
+    LinkedList l2(B, 3);
+    l1.Display();
+    l2.Display();
+    l1.MergeLists(l2.GetFirstNode());
+    l1.Display();
+}
+// Black box has 3 inputs A,B,C and 3 outputs !A,!B,!C
+// Can this be implemented with 2 NOT gates, no other inverters, and as many AND and OR gates as you like?
+void test7()
+{
+    for (int i=0; i<8; i++)
+    {
+        // Inputs
+        int A = (i & 4) ? 1 : 0;
+        int B = (i & 2) ? 1 : 0;
+        int C = (i & 1) ? 1 : 0;
+
+        // Internal nodes
+        int node_2or3ones = ((A & B) + (A & C) + (B & C));
+        int node_0or1ones = !node_2or3ones;
+        int node_1one = node_0or1ones & (A + B + C);
+        int node_1or3ones = node_1one + (A & B & C);
+        int node_0or2ones = !node_1or3ones;
+        int node_0ones = node_0or2ones & node_0or1ones;
+        int node_2ones = node_0or2ones & node_2or3ones;
+
+        // Outputs
+        int not_A = node_0ones + (node_1one & (B + C)) + (node_2ones & (B & C));
+        int not_B = node_0ones + (node_1one & (A + C)) + (node_2ones & (A & C));
+        int not_C = node_0ones + (node_1one & (A + B)) + (node_2ones & (A & B));
+
+        // Display
+        printf("Inputs A=%d,B=%d,C=%d --> outputs !A=%d,!B=%d,!C=%d\n", A, B, C, not_A, not_B, not_C);
+    }
+}
 
 // Bracketed CSV to INSERT statements (not generic in any sense)
 // ER: add quote handling [O'Hara] -> 'O'Hara' -> string not properly terminated
