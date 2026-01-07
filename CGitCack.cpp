@@ -18,7 +18,7 @@
 #include <string.h>
 #include <iso646.h>
 
-#define TEST test27
+#define TEST test30
 
 using std::cin;
 using std::cout;
@@ -117,6 +117,36 @@ LinkedList::~LinkedList() {
         first = first->next;
         delete p;
         p = first;
+    }
+}
+
+void get_binary_string(char *dest, int value, int bits)
+{
+    dest[bits] = 0;
+    for (int i = bits - 1; i >= 0; i--)
+    {
+        dest[i] = (value & 1) ? '1' : '0';
+        value >>= 1;
+    }
+}
+
+void test30()
+{
+    // Gosper's hack
+    int x = 0b0000000000000000000011111; // initial value
+    int w;                // next value to be computed
+    int count = 0;
+
+    char buf1[35], buf2[35];
+
+    for (int i = 0; x < 0b10000000000000000000000000; i++) {
+        int c = x & -x;
+        int r = x + c;
+        w = (((r ^ x) >> 2) / c) | r;
+        get_binary_string(buf1, x, 26);
+        get_binary_string(buf2, w, 26);
+        printf("%d Gosper's hack: %s -> %s\n", count++, buf1, buf2);
+        x = w;
     }
 }
 
